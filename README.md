@@ -7,7 +7,7 @@
 本项目是按文章所述方法，使用 Docker Compose 编排整合
 以实现简单一键部署
 
-<img src="https://github.com/fejich/docker-embyhack/working.jpg">
+<img src="https://github.com/fejich/docker-embyhack/raw/main/working.jpg">
 
 ---
 
