@@ -1,0 +1,48 @@
+server {
+
+	add_header Access-Control-Allow-Origin *;
+	add_header Access-Control-Allow-Headers *;
+	add_header Access-Control-Allow-Method *;
+	add_header Access-Control-Allow-Credentials true;
+
+	listen 80 default_server;
+
+	listen 443 ssl;
+
+	root /config/www;
+	index index.html index.htm index.php;
+
+	server_name _;
+
+	ssl_certificate /config/keys/cert.crt;
+	ssl_certificate_key /config/keys/cert.key;
+
+	client_max_body_size 0;
+
+	location / {
+		try_files $uri $uri/ /index.html /index.php?$args =404;
+	}
+
+	location ~ \.php$ {
+		fastcgi_split_path_info ^(.+\.php)(/.+)$;
+		# With php5-cgi alone:
+		fastcgi_pass 127.0.0.1:9000;
+		# With php5-fpm:
+		#fastcgi_pass unix:/var/run/php5-fpm.sock;
+		fastcgi_index index.php;
+		include /etc/nginx/fastcgi_params;
+	}
+	location /admin/service/registration/validateDevice {
+		default_type application/json;
+	return 200 '{"cacheExpirationDays": 7,"message": "Device Valid","resultCode": "GOOD"}';
+	}
+	location /admin/service/registration/validate {
+		default_type application/json;
+	return 200 '{"featId":"","registered":true,"expDate":"2099-01-01","key":""}';
+	}
+	location /admin/service/registration/getStatus {
+		default_type application/json;
+	return 200 '{"deviceStatus":"","planType":"","subscriptions":{}}';
+	}
+
+}
