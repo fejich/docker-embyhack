@@ -71,3 +71,8 @@ services:
 cd embyhack
 sudo docker-compose up -d
 ```
+
+
+### Infrastructure model
+
+![Infrastructure model](.infragenie/infrastructure_model.png)
