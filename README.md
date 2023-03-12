@@ -27,17 +27,22 @@ version: "2.1"
 services:
   nginx:
     image: linuxserver/nginx
-    container_name: mb3admin.com #两个容器间互联，实现免改 hosts/DNS 指定 emby 服务端访问本地伪造的 mb3admin.com 网站
+
+    # 两个容器间互联，实现免改 hosts/DNS
+    # 指定 emby 服务端访问本地伪造的 mb3admin.com 网站
+    container_name: mb3admin.com
+
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Shanghai
     volumes:
-      - ./nginx:/config #nginx 的配置目录，已经部署好伪造证书与 emby 授权的响应
+      # nginx 的配置目录，已经部署好伪造证书与 emby 授权的响应
+      - ./nginx:/config
+    restart: unless-stopped
+# 单纯破解与该容器互联的 emby 服务端情况下，无需映射 https 的 443 端口出来
 #    ports:
 #      - 443:443
-#单纯破解与该容器互联的 emby 服务端情况下，无需映射 https 的 443 端口出来
-    restart: unless-stopped
 
   emby:
     image: linuxserver/emby
@@ -49,19 +54,30 @@ services:
       - PGID=1000
       - TZ=Asia/Shanghai
     volumes:
-      - ./ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt #将添加了 伪造CA证书 的信任列表，替换到容器内
-      - ./emby-ca-certificates.crt:/app/emby/etc/ssl/certs/ca-certificates.crt ##将添加了 伪造CA证书 的信任列表，替换到容器内（emby 的 c# 环境）
-      - ./emby:/config #emby 的配置目录
-      - ./data:/data   #按需配置媒体目录
+      # 在后台替换付费信息，防止浏览器直接请求远端付费认证服务
+      - ./crypto.js:/app/emby/dashboard-ui/modules/polyfills/crypto.js:ro
+
+      # 将添加了 伪造 CA 证书 的信任列表，替换到容器内
+      - ./ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+
+      # 将添加了 伪造 CA 证书 的信任列表，替换到容器内（emby 的 c# 环境）
+      - ./emby-ca-certificates.crt:/app/emby/etc/ssl/certs/ca-certificates.crt:ro
+
+      # emby 的配置目录
+      - ./emby:/config
+
+      # 按需配置媒体目录
+      - ./data:/data
+
     ports:
       - 8096:8096
     devices:
       - /dev/dri:/dev/dri
     restart: unless-stopped
 
-#其他参数的具体含义，请查阅容器的官方文档
-#使用到的 nginx 容器       https://hub.docker.com/r/linuxserver/nginx
-#使用到的 emby 容器        https://hub.docker.com/r/linuxserver/emby
+# 其他参数的具体含义，请查阅容器的官方文档
+# 使用到的 nginx 容器       https://hub.docker.com/r/linuxserver/nginx
+# 使用到的 emby 容器        https://hub.docker.com/r/linuxserver/emby
 
 ```
 
